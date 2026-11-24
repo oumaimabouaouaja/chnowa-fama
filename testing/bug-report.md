@@ -222,4 +222,28 @@ Une incohérence entre les règles de validation et le comportement réel pourra
 
 La campagne de tests d'authentification a permis d'identifier des problèmes liés à la gestion des messages d'erreur ainsi qu'une anomalie potentielle concernant la validation du mot de passe.
 
-Les anomalies seront communiquées aux développeurs. Les corrections feront ensuite l'objet de tests de confirmation et de régression.
+Les anomalies seront communiquées aux développeurs. Les corrections feront ensuite l'objet de tests de confirmation et de régression.## BUG04 - Bouton Modifier non fonctionnel
+
+- Cas de test : TC33
+- Module : Organisateur
+- Sévérité : Major
+- Priorité : High
+- Statut : Open
+
+### Étapes de reproduction
+1. Se connecter avec un compte organisateur approuvé.
+2. Accéder à l'espace Organisateur.
+3. Accéder à Mes publications.
+4. Cliquer sur Modifier devant un événement.
+
+### Résultat attendu
+Le formulaire de modification s'ouvre.
+
+### Résultat obtenu
+Le clic sur Modifier ne déclenche aucune action.
+
+### Cause
+Non identifiée. Investigation nécessaire.
+
+### Preuve
+screenshots/TC33-event-update-failed.png

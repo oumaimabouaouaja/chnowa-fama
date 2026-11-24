@@ -53,7 +53,33 @@
 |---|---|---|---|---|---|
 | BVA01 | 7 caractères | Inscription refusée | Compte créé avec ID 4, longueur du mot de passe à confirmer | À vérifier | [Preuve](screenshots/BVA01-password-7.png) |
 | BVA02 | 8 caractères | Inscription acceptée | Compte créé dans PostgreSQL | PASSED | [Interface](screenshots/BVA02-password-8.png), [Database](screenshots/BVA02-database.png) |
-| BVA03 | 9 caractères | Inscription acceptée | Compte créé et enregistré dans PostgreSQL | PASSED | [Interface](screenshots/BVA03-password-9.png), [Database](screenshots/BVA03-database.png) |
+| BVA03 | 9 caractères | Inscription acceptée | Compte créé et enregistré dans PostgreSQL | PASSED | [Interface](screenshots/BVA03-password-9.png), [Database](screenshots/BVA03-database.png) 
+### Module Gestion du profil
+
+| ID | Cas de test | Résultat attendu | Résultat obtenu | Statut | Preuve |
+|---|---|---|---|---|---|
+| TC10 | Consultation du profil | Informations du compte affichées | Nom, email et centres d'intérêt correctement affichés | PASSED | [Preuve](screenshots/TC10-view-profile.png) |
+| TC11 | Modification du profil | Modification enregistrée | À compléter | NOT RUN | — |
+| TC12 | Gestion des intérêts | Préférences enregistrées | Les trois centres d'intérêt sont enregistrés et conservés après actualisation | PASSED | [Enregistrement](screenshots/TC12-save-interests.png), [Persistance](screenshots/TC12-interests-persistence.png) |
+### Module Gestion des organisateurs
+
+| ID | Cas de test | Résultat attendu | Résultat obtenu | Statut | Preuve |
+|---|---|---|---|---|---|
+| TC29 | Demande organisateur | Demande enregistrée | Demande envoyée avec succès et statut en attente de validation | PASSED | [Preuve](screenshots/TC29-organizer-request.png) |
+| TC30 | Consultation du statut | Statut correct affiché | Le statut en attente de validation reste affiché après actualisation | PASSED | [Preuve](screenshots/TC30-organizer-status.png) |
+| TC31 | Publication non autorisée | Publication refusée | Le Backend refuse la création car le compte organisateur est en attente de validation | PASSED | [Preuve](screenshots/TC31-unauthorized-publication.png) |[Preuve](screenshots/TC30-organizer-status.png) |
+| TC32 | Création événement | Événement créé | Hackathon ISTQB 2026 apparaît dans Mes publications | PASSED | [Preuve](screenshots/TC32-event-created.png) |
+| TC33 | Modification événement | Événement modifié avec succès | Modification enregistrée et conservée après actualisation | PASSED | [Preuve](screenshots/TC33-event-updated.png) |
+| TC34 | Suppression événement | Événement supprimé si autorisé | À compléter | NOT RUN | — |
+| TC35 | Consultation des participants | Participants affichés | À compléter | NOT RUN | — |
+### Module Administration
+
+| ID | Cas de test | Résultat attendu | Résultat obtenu | Statut | Preuve |
+|---|---|---|---|---|---|
+| TC36 | Dashboard Admin | Dashboard accessible | Tableau de bord administrateur accessible | PASSED | [Preuve](screenshots/TC36-TC37-admin-dashboard.png) |
+| TC37 | Demandes organisateurs | Demandes affichées | ISTQB Tech Club affiché avec le statut En attente | PASSED | [Preuve](screenshots/TC36-TC37-admin-dashboard.png) |
+| TC38 | Approbation organisateur | Statut mis à jour | À compléter | NOT RUN | — |
+| TC39 | Refus organisateur | Demande refusée | À compléter | NOT RUN | — |
 ## 5. Autres modules à tester
 
 - Gestion du profil.
@@ -66,7 +92,13 @@
 - API REST avec Postman.
 
 Les résultats seront ajoutés progressivement après exécution des cas de test.
+### Module Tests API REST — Postman
 
+| ID | Méthode | Endpoint | Résultat attendu | Résultat obtenu | Statut | Preuve |
+|---|---|---|---|---|---|---|
+| API01 | GET | /api/health | HTTP 200 | HTTP 200 et ok: true | PASSED | [Preuve](screenshots/API01-health-check.png) |
+| API02 | POST | /api/auth/login | HTTP 200 + JWT | HTTP 200, utilisateur authentifié et JWT généré | PASSED | [Preuve](screenshots/API02-organizer-login.png) |
+| API03 | GET | /api/organizers/me | HTTP 200 et approved: false | HTTP 200 et organisateur en attente de validation | PASSED | [Preuve](screenshots/API03-organizer-status.png) |
 ## 6. Preuves d'exécution
 
 Les captures d'écran des tests seront enregistrées dans le dossier screenshots/.
