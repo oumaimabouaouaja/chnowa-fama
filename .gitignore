@@ -3,3 +3,16 @@
 !.env.example
 node_modules/
 *.log
+
+# Tests Playwright
+frontend/playwright-report/
+frontend/test-results/
+frontend/e2e08-erreur.png
+
+# Fichiers sensibles
+**/.env
+**/.env.local
+
+# Dépendances
+node_modules/
+

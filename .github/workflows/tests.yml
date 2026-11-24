@@ -1,0 +1,170 @@
+
+name: CHNOWA FAMA - Tests automatiques
+
+on:
+  push:
+    branches: [main, feature/automation]
+  pull_request:
+    branches: [main]
+
+jobs:
+  backend-tests:
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres_test_password
+          POSTGRES_DB: chnowa_fama_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    env:
+      DATABASE_URL: postgresql://postgres:postgres_test_password@localhost:5432/chnowa_fama_test
+      JWT_SECRET: github_actions_test_secret_only_123456789
+      PORT: 4000
+      FRONTEND_ORIGIN: http://localhost:5173
+
+    steps:
+      - name: Récupérer le projet
+        uses: actions/checkout@v4
+
+      - name: Installer Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: backend/package-lock.json
+
+      - name: Installer les dépendances
+        working-directory: backend
+        run: npm ci
+
+      - name: Initialiser la base de test
+        working-directory: backend
+        run: npm run db:init
+
+      - name: Démarrer le Backend
+        working-directory: backend
+        run: |
+          npm run dev > backend.log 2>&1 &
+          echo $! > backend.pid
+
+      - name: Exécuter les tests Backend
+        working-directory: backend
+        run: npx vitest run
+
+      - name: Attendre le démarrage du Backend
+        run: |
+          for i in $(seq 1 30); do
+            if curl --fail --silent http://localhost:4000/api/health > /dev/null; then
+              echo "Backend prêt !"
+              exit 0
+            fi
+            echo "Attente du Backend..."
+            sleep 2
+          done
+          echo "Erreur : Backend non disponible"
+          cat backend/backend.log
+          exit 1
+
+  frontend-e2e:
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres_test_password
+          POSTGRES_DB: chnowa_fama_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    env:
+      DATABASE_URL: postgresql://postgres:postgres_test_password@localhost:5432/chnowa_fama_test
+      JWT_SECRET: github_actions_test_secret_only_123456789
+      PORT: 4000
+      FRONTEND_ORIGIN: http://localhost:5173
+
+    steps:
+      - name: Récupérer le projet
+        uses: actions/checkout@v4
+
+      - name: Installer Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Installer les dépendances Backend
+        working-directory: backend
+        run: npm ci
+
+      - name: Installer les dépendances Frontend
+        working-directory: frontend
+        run: npm ci
+
+      - name: Installer Chromium
+        working-directory: frontend
+        run: npx playwright install --with-deps chromium
+
+      - name: Initialiser la base de test
+        working-directory: backend
+        run: npm run db:init
+
+      - name: Démarrer Backend et Frontend
+        run: |
+          cd backend
+          node src/server.js > backend.log 2>&1 &
+          cd ../frontend
+          npm run dev -- --host 127.0.0.1 > frontend.log 2>&1 &
+
+      - name: Attendre les serveurs
+        run: |
+          for i in $(seq 1 30); do
+            if curl -fsS http://localhost:4000/api/health > /dev/null && curl -fsS http://localhost:5173 > /dev/null; then
+              echo "Backend et Frontend prêts"
+              exit 0
+            fi
+            sleep 2
+          done
+          echo "Erreur : serveurs non disponibles"
+          cat backend/backend.log frontend/frontend.log
+          exit 1
+
+     
+      - name: Créer le compte de test et exécuter les tests E2E
+        working-directory: frontend
+        env:
+          E2E_EMAIL: test@example.com
+          E2E_PASSWORD: Test12345!
+        run: |
+          curl --fail-with-body --silent --show-error \
+            -X POST http://localhost:4000/api/auth/register \
+            -H "Content-Type: application/json" \
+            -d "{\"name\":\"Test User\",\"email\":\"${E2E_EMAIL}\",\"password\":\"${E2E_PASSWORD}\"}"
+
+          npx playwright test e2e/home.spec.js --browser=chromium --reporter=html
+
+
+      - name: Sauvegarder le rapport Playwright
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: rapport-playwright
+          path: frontend/playwright-report/
+          retention-days: 7
+
+
